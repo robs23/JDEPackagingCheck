@@ -11,8 +11,6 @@ namespace JDEPackagingCheck
 {
     public partial class JDEPackagingCheckRibbon
     {
-        public int StockColumn { get; set; } = 7;
-        public int FirstColumn { get; set; } = 10;
         private void JDEPackagingCheckRibbon_Load(object sender, RibbonUIEventArgs e)
         {
 
@@ -23,58 +21,105 @@ namespace JDEPackagingCheck
             Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
             Worksheet sht = wb.ActiveSheet;
 
-            Range UsedRange = sht.UsedRange;
-            foreach(Range row in UsedRange.Rows)
+            int? stockColumn = GetStockColumn();
+            if(stockColumn != null)
             {
-                double stock = 0;
+                int firstColumn = (int)stockColumn + 3;
+                Range UsedRange = sht.UsedRange;
+                string userRangeAddress = UsedRange.Address;
 
-                if(((Range)UsedRange[row.Row, StockColumn]).Value != null)
+                foreach (Range row in UsedRange.Rows)
                 {
-                    bool isNumber = double.TryParse(((Range)UsedRange[row.Row, StockColumn]).Value.ToString(), out stock);
-                    if (isNumber)
+                    double stock = 0;
+
+                    if (((Range)UsedRange[row.Row, stockColumn]).Value != null)
                     {
-                        for (int i = FirstColumn; i < UsedRange.Columns.Count-1; i++)
+                        bool isNumber = double.TryParse(((Range)UsedRange[row.Row, stockColumn]).Value.ToString(), out stock);
+                        if (isNumber)
                         {
-                            double currReq = 0;
-                            if(((Range)UsedRange[row.Row, i]).Value != null)
+                            for (int i = firstColumn; i < UsedRange.Columns.Count - 1; i++)
                             {
-                                string val = ((Range)UsedRange[row.Row, i]).Value.ToString();
-                                isNumber = double.TryParse(((Range)UsedRange[row.Row, i]).Value.ToString(), out currReq);
-                                if (isNumber)
+                                double currReq = 0;
+                                if (((Range)UsedRange[row.Row, i]).Value != null)
                                 {
-                                    if (currReq > stock)
+                                    string val = ((Range)UsedRange[row.Row, i]).Value.ToString();
+                                    isNumber = double.TryParse(((Range)UsedRange[row.Row, i]).Value.ToString(), out currReq);
+                                    if (isNumber)
                                     {
-                                        break;
+                                        if (currReq > stock)
+                                        {
+                                            break;
+                                        }
+
+                                        //decrease remaining stock
+                                        stock -= currReq;
                                     }
-                                    
-                                    //decrease remaining stock
-                                    stock -= currReq;
                                 }
+                                //paint
+                                ((Range)UsedRange[row.Row, i]).Interior.Color = Color.LightGray;
                             }
-                            //paint
-                            ((Range)UsedRange[row.Row, i]).Interior.Color = Color.LightGray;
                         }
                     }
                 }
             }
+            else
+            {
+                MessageBox.Show("Nie udało się odnaleźć kolumny zawierającej zapas. Oznacz kolumnę zapasu wpisując \"z\" w nagłówku.", "Nie znalazłem zapasu..", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+
+            
         }
 
         private void btnHideCoverage_Click(object sender, RibbonControlEventArgs e)
         {
                         Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
             Worksheet sht = wb.ActiveSheet;
+            int? stockColumn = GetStockColumn();
 
-            Range UsedRange = sht.UsedRange;
-            foreach(Range row in UsedRange.Rows)
+            if (stockColumn != null)
             {
-                for (int i = FirstColumn; i < UsedRange.Columns.Count - 1; i++)
+                int firstColumn = (int)stockColumn + 3;
+                Range UsedRange = sht.UsedRange;
+                foreach (Range row in UsedRange.Rows)
                 {
-                    if (((Range)UsedRange[row.Row, i]).Interior.Color == ColorTranslator.ToOle(System.Drawing.Color.LightGray))
+                    for (int i = firstColumn; i < UsedRange.Columns.Count - 1; i++)
                     {
-                        ((Range)UsedRange[row.Row, i]).Interior.Color = Color.Transparent;
+                        if (((Range)UsedRange[row.Row, i]).Interior.Color == ColorTranslator.ToOle(System.Drawing.Color.LightGray))
+                        {
+                            ((Range)UsedRange[row.Row, i]).Interior.Color = Color.Transparent;
+                        }
                     }
                 }
             }
+        }
+
+        private int? GetStockColumn()
+        {
+            Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
+            Worksheet sht = wb.ActiveSheet;
+            int? ret = null;
+
+            Range UsedRange = sht.UsedRange;
+            foreach (Range row in UsedRange.Rows)
+            {
+                for (int i = 0; i < UsedRange.Columns.Count - 1; i++)
+                {
+                    if(((Range)UsedRange[row.Row, i]).Value != null)
+                    {
+                        if(((Range)UsedRange[row.Row, i]).Value.ToString().ToLower() == "z"){
+                            //we found it!
+                            ret = i;
+                            break;
+                        }
+                    }
+                }
+                if(ret != null)
+                {
+                    break;
+                }
+            }
+
+            return ret;
         }
     }
 }
