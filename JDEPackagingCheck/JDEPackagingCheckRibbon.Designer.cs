@@ -37,16 +37,21 @@ namespace JDEPackagingCheck
         {
             this.tabJDEPackaging = this.Factory.CreateRibbonTab();
             this.grpScheduleKontrol = this.Factory.CreateRibbonGroup();
+            this.grpImport = this.Factory.CreateRibbonGroup();
             this.btnShowCoverage = this.Factory.CreateRibbonButton();
             this.btnHideCoverage = this.Factory.CreateRibbonButton();
+            this.btnImportInventories = this.Factory.CreateRibbonButton();
+            this.btnImportDeliveries = this.Factory.CreateRibbonButton();
             this.tabJDEPackaging.SuspendLayout();
             this.grpScheduleKontrol.SuspendLayout();
+            this.grpImport.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabJDEPackaging
             // 
             this.tabJDEPackaging.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tabJDEPackaging.Groups.Add(this.grpScheduleKontrol);
+            this.tabJDEPackaging.Groups.Add(this.grpImport);
             this.tabJDEPackaging.Label = "JDE Opakowania";
             this.tabJDEPackaging.Name = "tabJDEPackaging";
             // 
@@ -56,6 +61,13 @@ namespace JDEPackagingCheck
             this.grpScheduleKontrol.Items.Add(this.btnHideCoverage);
             this.grpScheduleKontrol.Label = "Kontrola harmonogramu";
             this.grpScheduleKontrol.Name = "grpScheduleKontrol";
+            // 
+            // grpImport
+            // 
+            this.grpImport.Items.Add(this.btnImportInventories);
+            this.grpImport.Items.Add(this.btnImportDeliveries);
+            this.grpImport.Label = "Import";
+            this.grpImport.Name = "grpImport";
             // 
             // btnShowCoverage
             // 
@@ -75,6 +87,25 @@ namespace JDEPackagingCheck
             this.btnHideCoverage.ShowImage = true;
             this.btnHideCoverage.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnHideCoverage_Click);
             // 
+            // btnImportInventories
+            // 
+            this.btnImportInventories.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnImportInventories.Image = global::JDEPackagingCheck.Properties.Resources.inventory;
+            this.btnImportInventories.Label = "Importuj zapasy";
+            this.btnImportInventories.Name = "btnImportInventories";
+            this.btnImportInventories.ShowImage = true;
+            this.btnImportInventories.SuperTip = "Importuj stany magazynowe pobrane z SAPa";
+            this.btnImportInventories.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnImportInventories_Click);
+            // 
+            // btnImportDeliveries
+            // 
+            this.btnImportDeliveries.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnImportDeliveries.Image = global::JDEPackagingCheck.Properties.Resources.delivery;
+            this.btnImportDeliveries.Label = "Importuj dostawy";
+            this.btnImportDeliveries.Name = "btnImportDeliveries";
+            this.btnImportDeliveries.ShowImage = true;
+            this.btnImportDeliveries.SuperTip = "Importuj dostawy komponentów pobrane z SAPa";
+            // 
             // JDEPackagingCheckRibbon
             // 
             this.Name = "JDEPackagingCheckRibbon";
@@ -85,6 +116,8 @@ namespace JDEPackagingCheck
             this.tabJDEPackaging.PerformLayout();
             this.grpScheduleKontrol.ResumeLayout(false);
             this.grpScheduleKontrol.PerformLayout();
+            this.grpImport.ResumeLayout(false);
+            this.grpImport.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -95,6 +128,9 @@ namespace JDEPackagingCheck
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup grpScheduleKontrol;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnShowCoverage;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnHideCoverage;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup grpImport;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnImportInventories;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnImportDeliveries;
     }
 
     partial class ThisRibbonCollection

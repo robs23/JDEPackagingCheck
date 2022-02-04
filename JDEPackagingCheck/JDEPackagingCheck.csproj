@@ -185,6 +185,10 @@
     <Compile Include="JDEPackagingCheckRibbon.Designer.cs">
       <DependentUpon>JDEPackagingCheckRibbon.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\InventorySnapshot.cs" />
+    <Compile Include="Models\InventorySnapshotKeeper.cs" />
+    <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\ProductKeeper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -210,6 +214,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Static\Extensions.cs" />
+    <Compile Include="Static\Secrets.cs" />
+    <Compile Include="Static\Settings.cs" />
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -229,6 +236,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\hideCoverage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\inventory.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delivery.png" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

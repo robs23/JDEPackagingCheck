@@ -121,5 +121,10 @@ namespace JDEPackagingCheck
 
             return ret;
         }
+
+        private void btnImportInventories_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
     }
 }
