@@ -12,6 +12,7 @@ namespace JDEPackagingCheck.Models
         public string ProductId { get; set; }
         public string Size { get; set; }
         public string Unit { get; set; }
-        public DateTime TakeOn { get; set; }
+        public string Status { get; set; }
+        public DateTime TakenOn { get; set; }
     }
 }

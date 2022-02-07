@@ -37,9 +37,9 @@ namespace JDEPackagingCheck
         {
             this.tabJDEPackaging = this.Factory.CreateRibbonTab();
             this.grpScheduleKontrol = this.Factory.CreateRibbonGroup();
-            this.grpImport = this.Factory.CreateRibbonGroup();
             this.btnShowCoverage = this.Factory.CreateRibbonButton();
             this.btnHideCoverage = this.Factory.CreateRibbonButton();
+            this.grpImport = this.Factory.CreateRibbonGroup();
             this.btnImportInventories = this.Factory.CreateRibbonButton();
             this.btnImportDeliveries = this.Factory.CreateRibbonButton();
             this.tabJDEPackaging.SuspendLayout();
@@ -62,13 +62,6 @@ namespace JDEPackagingCheck
             this.grpScheduleKontrol.Label = "Kontrola harmonogramu";
             this.grpScheduleKontrol.Name = "grpScheduleKontrol";
             // 
-            // grpImport
-            // 
-            this.grpImport.Items.Add(this.btnImportInventories);
-            this.grpImport.Items.Add(this.btnImportDeliveries);
-            this.grpImport.Label = "Import";
-            this.grpImport.Name = "grpImport";
-            // 
             // btnShowCoverage
             // 
             this.btnShowCoverage.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -86,6 +79,13 @@ namespace JDEPackagingCheck
             this.btnHideCoverage.Name = "btnHideCoverage";
             this.btnHideCoverage.ShowImage = true;
             this.btnHideCoverage.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnHideCoverage_Click);
+            // 
+            // grpImport
+            // 
+            this.grpImport.Items.Add(this.btnImportInventories);
+            this.grpImport.Items.Add(this.btnImportDeliveries);
+            this.grpImport.Label = "Import";
+            this.grpImport.Name = "grpImport";
             // 
             // btnImportInventories
             // 
