@@ -35,7 +35,7 @@ namespace JDEPackagingCheck.Models
                     rStr.Add(cStr);
                     cStr = "";
                 }
-                cStr += $"({i.ProductId},{i.Size},'{i.Unit}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{i.Status}'),";
+                cStr += $"({i.ProductId},{i.Size.ToString().Replace(",",".")},'{i.Unit}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{i.Status}'),";
 
             }
             //non-full item set must be added here... otherwise it won't be added

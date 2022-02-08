@@ -19,7 +19,10 @@ namespace JDEPackagingCheck.Models
 
         public void Reload()
         {
-            string sql = "SELECT zfinId, zfinIndex, zfinName, prodStatus, basicUod FROM tbZfin";
+
+            Items.Clear();
+
+            string sql = "SELECT zfinId, zfinIndex, zfinName, prodStatus, basicUom FROM tbZfin";
 
             SqlCommand sqlComand;
             sqlComand = new SqlCommand(sql, Settings.conn);

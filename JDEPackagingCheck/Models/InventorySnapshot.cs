@@ -9,8 +9,8 @@ namespace JDEPackagingCheck.Models
     public class InventorySnapshot
     {
         public int InventorySnapshotId { get; set; }
-        public string ProductId { get; set; }
-        public string Size { get; set; }
+        public int ProductId { get; set; }
+        public double Size { get; set; }
         public string Unit { get; set; }
         public string Status { get; set; }
         public DateTime TakenOn { get; set; }

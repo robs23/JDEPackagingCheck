@@ -13,6 +13,9 @@ namespace JDEPackagingCheck
     public partial class JDEPackagingCheckRibbon
     {
         public ProductKeeper productKeeper = new ProductKeeper();
+        public InventorySnapshotKeeper inventorySnapshotKeeper = new InventorySnapshotKeeper();
+
+        public Range UsedRange { get; set; }
 
         private void JDEPackagingCheckRibbon_Load(object sender, RibbonUIEventArgs e)
         {
@@ -129,7 +132,7 @@ namespace JDEPackagingCheck
         {
             Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
             Worksheet sht = wb.ActiveSheet;
-            Range UsedRange = sht.UsedRange;
+            UsedRange = sht.UsedRange;
 
             bool found = false;
             int cComponent = 0;
@@ -184,6 +187,7 @@ namespace JDEPackagingCheck
 
                 if (found)
                 {
+                    //Create products not yet available in database
                     foreach(Range row in UsedRange.Rows)
                     {
                         if (((Range)UsedRange[row.Row, cComponent]).Value2 != null && ((Range)UsedRange[row.Row, cComponentName]).Value2 != null && ((Range)UsedRange[row.Row, cUom]).Value2 != null)
@@ -194,13 +198,58 @@ namespace JDEPackagingCheck
                                 {
                                     Product p = new Product();
                                     p.ZfinIndex = ind;
-                                    p.ZfinName = ((Range)UsedRange[row.Row, cComponentName]).Value;
+                                    string name = ((Range)UsedRange[row.Row, cComponentName]).Value;
+                                    p.ZfinName = name.Replace("\'", "");
                                     p.BasicUom = ((Range)UsedRange[row.Row, cUom]).Value;
                                     productKeeper.Items.Add(p);
                                 }
                             }
                         }
                     }
+                    productKeeper.CreateMissingProducts();
+                    productKeeper.Reload();
+
+                    //Create inventorySnapshots
+                    foreach (Range row in UsedRange.Rows)
+                    {
+                        if (((Range)UsedRange[row.Row, cComponent]).Value2 != null && ((Range)UsedRange[row.Row, cUnrestricted]).Value2 != null && ((Range)UsedRange[row.Row, cBlocked]).Value2 != null && ((Range)UsedRange[row.Row, cUom]).Value2 != null)
+                        {
+                            if (int.TryParse(((Range)UsedRange[row.Row, cComponent]).Value, out int ind))
+                            {
+                                if (ind > 0)
+                                {
+                                    int productId = productKeeper.Items.Where(x => x.ZfinIndex == ind).FirstOrDefault().ZfinId;
+                                    if(productId > 0)
+                                    {
+                                        //Unrestricted stock
+                                        InventorySnapshot i = new InventorySnapshot();
+                                        i.ProductId = productId;
+                                        i.Status = "U";
+                                        double size = 0;
+                                        string sSize = ((Range)UsedRange[row.Row, cUnrestricted]).Value.ToString();
+                                        bool isParsable = double.TryParse(sSize, out size);
+                                        i.Size = size;
+                                        i.Unit = ((Range)UsedRange[row.Row, cUom]).Value;
+                                        inventorySnapshotKeeper.Items.Add(i);
+
+                                        //Blocked stock
+                                        i = new InventorySnapshot();
+                                        i.ProductId = productId;
+                                        i.Status = "B";
+                                        size = 0;
+                                        sSize = ((Range)UsedRange[row.Row, cBlocked]).Value.ToString();
+                                        isParsable = double.TryParse(sSize, out size);
+                                        i.Size = size;
+                                        i.Unit = ((Range)UsedRange[row.Row, cUom]).Value;
+                                        inventorySnapshotKeeper.Items.Add(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    inventorySnapshotKeeper.CreateSnapshot();
+                    MessageBox.Show("Import zakończony powodzeniem!", "Powodzenie", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 }
                 else
                 {
@@ -209,7 +258,7 @@ namespace JDEPackagingCheck
             }
             catch (Exception ex)
             {
-
+                MessageBox.Show($"Uuups.. Coś poszło nie tak! Szczegóły: {ex.Message}", "Napotkano błędy", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
