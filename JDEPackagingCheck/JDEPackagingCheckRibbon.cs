@@ -14,6 +14,7 @@ namespace JDEPackagingCheck
     {
         public ProductKeeper productKeeper = new ProductKeeper();
         public InventorySnapshotKeeper inventorySnapshotKeeper = new InventorySnapshotKeeper();
+        public DeliveryItemKeeper deliveryItemKeeper = new DeliveryItemKeeper();
 
         public Range UsedRange { get; set; }
 
@@ -128,6 +129,169 @@ namespace JDEPackagingCheck
             return ret;
         }
 
+        private void btnImportDeliveries_Click(object sender, RibbonControlEventArgs e)
+        {
+            Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
+            Worksheet sht = wb.ActiveSheet;
+            UsedRange = sht.UsedRange;
+
+            bool found = false;
+            int cComponent = 0;
+            int cComponentName = 0;
+            int cPo = 0;
+            int cDocumentDate = 0;
+            int cOrderQty = 0;
+            int cOpenQty = 0;
+            int cReceivedQty = 0;
+            int cNetPrice = 0;
+            int cVendor = 0;
+            int cDeliveryDate = 0;
+
+            try
+            {
+                for (int i = 1; i <= UsedRange.Columns.Count; i++)
+                {
+                    if (cComponent == 0 || cComponentName == 0 || cPo == 0 || cDocumentDate == 0 || cOrderQty == 0 || cOpenQty == 0 || cReceivedQty == 0 || cNetPrice == 0 || cVendor == 0 || cDeliveryDate == 0)
+                    {
+
+                        try
+                        {
+                            string aCell = ((Range)UsedRange.Cells[1, i]).Value;
+
+                            if (aCell == "Material")
+                            {
+                                cComponent = i;
+                            }
+                            else if (aCell == "Short Text")
+                            {
+                                cComponentName = i;
+                            }
+                            else if (aCell == "Purchasing Document")
+                            {
+                                cPo = i;
+                            }
+                            else if (aCell == "Document Date")
+                            {
+                                cDocumentDate = i;
+                            }
+                            else if (aCell == "Order Quantity")
+                            {
+                                cOrderQty = i;
+                            }
+                            else if (aCell == "Still to be delivered (qty)")
+                            {
+                                cOpenQty = i;
+                            }
+                            else if (aCell == "Quantity Received")
+                            {
+                                cReceivedQty = i;
+                            }
+                            else if (aCell == "Net price")
+                            {
+                                cNetPrice = i;
+                            }
+                            else if (aCell == "Name of Vendor")
+                            {
+                                cVendor = i;
+                            }
+                            else if (aCell == "Delivery Date")
+                            {
+                                cDeliveryDate = i;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        if (cComponent != 0 && cComponentName != 0 && cPo != 0 && cDocumentDate != 0 && cOrderQty != 0 && cOpenQty != 0 && cReceivedQty != 0 && cNetPrice != 0 && cVendor != 0 && cDeliveryDate != 0)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (found)
+                {
+                    //Create products not yet available in database
+                    foreach(Range row in UsedRange.Rows)
+                    {
+                        if (((Range)UsedRange[row.Row, cComponent]).Value2 != null && ((Range)UsedRange[row.Row, cComponentName]).Value2 != null)
+                        {
+                            if(int.TryParse(((Range)UsedRange[row.Row, cComponent]).Value, out int ind))
+                            {
+                                if(ind > 0)
+                                {
+                                    Product p = new Product();
+                                    p.ZfinIndex = ind;
+                                    string name = ((Range)UsedRange[row.Row, cComponentName]).Value;
+                                    p.ZfinName = name.Replace("\'", "");
+                                    p.BasicUom = "PC";
+                                    productKeeper.Items.Add(p);
+                                }
+                            }
+                        }
+                    }
+                    productKeeper.CreateMissingProducts();
+                    productKeeper.Reload();
+
+                    //Create deliveryItems
+                    foreach (Range row in UsedRange.Rows)
+                    {
+                        if (((Range)UsedRange[row.Row, cComponent]).Value2 != null && ((Range)UsedRange[row.Row, cPo]).Value2 != null && ((Range)UsedRange[row.Row, cDocumentDate]).Value2 != null && ((Range)UsedRange[row.Row, cOrderQty]).Value2 != null && ((Range)UsedRange[row.Row, cOpenQty]).Value2 != null && ((Range)UsedRange[row.Row, cReceivedQty]).Value2 != null && ((Range)UsedRange[row.Row, cNetPrice]).Value2 != null && ((Range)UsedRange[row.Row, cVendor]).Value2 != null && ((Range)UsedRange[row.Row, cDeliveryDate]).Value2 != null)
+                        {
+                            if (int.TryParse(((Range)UsedRange[row.Row, cComponent]).Value, out int ind))
+                            {
+                                if (ind > 0)
+                                {
+                                    int productId = productKeeper.Items.Where(x => x.ZfinIndex == ind).FirstOrDefault().ZfinId;
+                                    if(productId > 0)
+                                    {
+                                        //Unrestricted stock
+                                        DeliveryItem i = new DeliveryItem();
+                                        i.ProductId = productId;
+                                        i.DocumentDate = Convert.ToDateTime(((Range)UsedRange[row.Row, cDocumentDate]).Value);
+                                        i.PurchaseOrder = ((Range)UsedRange[row.Row, cPo]).Value;
+                                        double qty = 0;
+                                        string sQty = ((Range)UsedRange[row.Row, cOrderQty]).Value.ToString();
+                                        bool isParsable = double.TryParse(sQty, out qty);
+                                        i.OrderQuantity = qty;
+                                        qty = 0;
+                                        sQty = ((Range)UsedRange[row.Row, cOpenQty]).Value.ToString();
+                                        isParsable = double.TryParse(sQty, out qty);
+                                        i.OpenQuantity = qty;
+                                        qty = 0;
+                                        sQty = ((Range)UsedRange[row.Row, cReceivedQty]).Value.ToString();
+                                        isParsable = double.TryParse(sQty, out qty);
+                                        i.ReceivedQuantity = qty;
+                                        qty = 0;
+                                        sQty = ((Range)UsedRange[row.Row, cNetPrice]).Value.ToString();
+                                        isParsable = double.TryParse(sQty, out qty);
+                                        i.NetPrice = qty;
+                                        i.Vendor = ((Range)UsedRange[row.Row, cVendor]).Value;
+                                        i.DeliveryDate = Convert.ToDateTime(((Range)UsedRange[row.Row, cDeliveryDate]).Value);
+                                        i.CreatedOn = DateTime.Now;
+                                        deliveryItemKeeper.Items.Add(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    deliveryItemKeeper.CreateSnapshot();
+                    MessageBox.Show("Import zakończony powodzeniem!", "Powodzenie", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                }
+                else
+                {
+                    MessageBox.Show("Nie udało się odnaleźć wszystkich kolumn.. Pawidłowy typ raportu to ME2M z SAP w układzie /M024_ZPKG", "Brakujące kolumny", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Uuups.. Coś poszło nie tak! Szczegóły: {ex.Message}", "Napotkano błędy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnImportInventories_Click(object sender, RibbonControlEventArgs e)
         {
             Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
@@ -188,13 +352,13 @@ namespace JDEPackagingCheck
                 if (found)
                 {
                     //Create products not yet available in database
-                    foreach(Range row in UsedRange.Rows)
+                    foreach (Range row in UsedRange.Rows)
                     {
                         if (((Range)UsedRange[row.Row, cComponent]).Value2 != null && ((Range)UsedRange[row.Row, cComponentName]).Value2 != null && ((Range)UsedRange[row.Row, cUom]).Value2 != null)
                         {
-                            if(int.TryParse(((Range)UsedRange[row.Row, cComponent]).Value, out int ind))
+                            if (int.TryParse(((Range)UsedRange[row.Row, cComponent]).Value, out int ind))
                             {
-                                if(ind > 0)
+                                if (ind > 0)
                                 {
                                     Product p = new Product();
                                     p.ZfinIndex = ind;
@@ -219,7 +383,7 @@ namespace JDEPackagingCheck
                                 if (ind > 0)
                                 {
                                     int productId = productKeeper.Items.Where(x => x.ZfinIndex == ind).FirstOrDefault().ZfinId;
-                                    if(productId > 0)
+                                    if (productId > 0)
                                     {
                                         //Unrestricted stock
                                         InventorySnapshot i = new InventorySnapshot();

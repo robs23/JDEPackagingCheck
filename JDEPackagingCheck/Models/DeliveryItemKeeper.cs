@@ -9,23 +9,23 @@ using System.Threading.Tasks;
 
 namespace JDEPackagingCheck.Models
 {
-    public class InventorySnapshotKeeper
+    public class DeliveryItemKeeper
     {
-        public List<InventorySnapshot> Items { get; set; }
+        public List<DeliveryItem> Items { get; set; }
 
-        public InventorySnapshotKeeper()
+        public DeliveryItemKeeper()
         {
-            Items = new List<InventorySnapshot>();
+            Items = new List<DeliveryItem>();
         }
 
         public int CreateSnapshot()
         {
             int res = -1;
-            List<string> rStr = new List<string>(); //collection of inventories formatted for batch upload eg (11111,'Name', 'pc'),(22222,'Name', 'kg'),... Each item contains 1000 records max (sql server requirement)
+            List<string> rStr = new List<string>(); //collection of deliveryItems formatted for batch upload eg (11111,'Name', 'pc'),(22222,'Name', 'kg'),... Each item contains 1000 records max (sql server requirement)
             string cStr = ""; //current item
             int counter = 0;
 
-            foreach (InventorySnapshot i in Items)
+            foreach (DeliveryItem d in Items)
             {
                 //prepare insert string
                 counter++;
@@ -36,7 +36,7 @@ namespace JDEPackagingCheck.Models
                     rStr.Add(cStr);
                     cStr = "";
                 }
-                cStr += $"({i.ProductId},{i.Size.ToString(CultureInfo.CreateSpecificCulture("en-GB"))},'{i.Unit}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{i.Status}'),";
+                cStr += $"({d.ProductId},'{d.DocumentDate.ToString("yyyy-MM-dd")}','{d.PurchaseOrder}',{d.OrderQuantity.ToString(CultureInfo.CreateSpecificCulture("en-GB"))},{d.OpenQuantity.ToString(CultureInfo.CreateSpecificCulture("en-GB"))},{d.ReceivedQuantity.ToString(CultureInfo.CreateSpecificCulture("en-GB"))},{d.NetPrice.ToString(CultureInfo.CreateSpecificCulture("en-GB"))},'{d.DeliveryDate.ToString("yyyy-MM-dd")}','{d.Vendor}','{d.CreatedOn.ToString("yyyy-MM-dd HH:mm:ss")}'),";
 
             }
             //non-full item set must be added here... otherwise it won't be added
@@ -58,14 +58,14 @@ namespace JDEPackagingCheck.Models
                 foreach (string s in rStr)
                 {
                     //do this for each 1000 items
-                    string iSql = "INSERT INTO tbInventorySnapshots(ProductId, Size, Unit, TakenOn, Status) VALUES " + s;
+                    string iSql = "INSERT INTO tbDeliveryItems(ProductId, DocumentDate, PurchaseOrder, OrderQuantity, OpenQuantity, ReceivedQuantity, NetPrice, DeliveryDate, Vendor, CreatedOn) VALUES " + s;
                     using (SqlCommand iCommand = new SqlCommand(iSql, Settings.conn))
                     {
                         res = iCommand.ExecuteNonQuery();
                     }
                 }
             }
-            
+
 
             return res;
         }

@@ -185,6 +185,8 @@
     <Compile Include="JDEPackagingCheckRibbon.Designer.cs">
       <DependentUpon>JDEPackagingCheckRibbon.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\DeliveryItem.cs" />
+    <Compile Include="Models\DeliveryItemKeeper.cs" />
     <Compile Include="Models\InventorySnapshot.cs" />
     <Compile Include="Models\InventorySnapshotKeeper.cs" />
     <Compile Include="Models\Product.cs" />

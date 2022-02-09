@@ -105,6 +105,7 @@ namespace JDEPackagingCheck
             this.btnImportDeliveries.Name = "btnImportDeliveries";
             this.btnImportDeliveries.ShowImage = true;
             this.btnImportDeliveries.SuperTip = "Importuj dostawy komponentów pobrane z SAPa";
+            this.btnImportDeliveries.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnImportDeliveries_Click);
             // 
             // JDEPackagingCheckRibbon
             // 
